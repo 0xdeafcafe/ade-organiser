@@ -3,7 +3,7 @@
 
 const path = require('path');
 const fs = require('fs');
-// const reactPlugin = require('@vitejs/plugin-react');
+const reactPlugin = require('@vitejs/plugin-react');
 
 const environment = process.env.NODE_ENV;
 const sourcePath = environment === 'development' ? 'src' : 'dist';
@@ -23,9 +23,9 @@ module.exports = {
 			'@app': path.join(__dirname, './src'),
 		},
 	},
-	// plugins: [
-	// 	reactPlugin({ include: '**/*.tsx' }),
-	// ],
+	plugins: [
+		reactPlugin({ include: '**/*.tsx' }),
+	],
 	build: {
 		target: 'chrome93',
 		outDir: '../dist',
