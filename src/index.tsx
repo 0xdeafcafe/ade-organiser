@@ -14,11 +14,10 @@ const ApplicationEntrypoint: React.FC = () => {
 
 	return (
 		<Provider store={store}>
-			<base href={'./'} />
-				<DesignSystemProvider themeKey={theme}>
-					<GlobalStyle />
-					<WebEntrypoint />
-				</DesignSystemProvider>
+			<DesignSystemProvider themeKey={theme}>
+				<GlobalStyle />
+				<WebEntrypoint />
+			</DesignSystemProvider>
 		</Provider>
 	);
 };

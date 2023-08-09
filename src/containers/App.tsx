@@ -13,7 +13,7 @@ export const App: React.FC = () => {
 			<Container>
 				<Title onClick={() => window.location.href = getPathNameBase()}>
 					<strong>{'Houghton'}</strong>
-					{' organiser'}
+					{' met de jongens'}
 				</Title>
 				<PartyTimeline />
 			</Container>
@@ -64,7 +64,7 @@ const Background = styled.div`
 	position: fixed;
 	top: 0; left: 0; right: 0; bottom: 0;
 
-	background: url('/images/bg-1.png');
+	background: url('${getPathNameBase()}/images/bg-1.png}');
 	background-position: center;
 	background-size: cover;
 
@@ -78,7 +78,7 @@ const Background2 = styled.div`
 	position: fixed;
 	top: 0; left: 0; right: 0; bottom: 0;
 
-	background: url('/images/bg-2.png');
+	background: url('${getPathNameBase()}/images/bg-2.png}');
 	background-position: center;
 	background-size: cover;
 
