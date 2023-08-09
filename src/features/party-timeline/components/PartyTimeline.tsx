@@ -1,71 +1,60 @@
 import React from 'react';
-import { differenceInMinutes, format } from 'date-fns';
-import styled from 'styled-components';
-import { sortIso8601 } from '../../../utils/sort';
-import { generatePartyIndex, generateTimelineIndicatorState } from '../../../utils/timeline-indicator-state';
-
-interface Party {
-	name: string;
-	location: string;
-	accent: string;
-	startsAt: string;
-	endsAt: string;
-}
-
-const parties: Party[] = [{
-	name: 'DGTL Thuesday',
-	location: 'NDSM werf',
-	accent: '#d45d80',
-	startsAt: '2023-10-19T22:00:00+01:00',
-	endsAt: '2023-10-20T07:00:00+01:00',
-}, {
-	name: 'Pleinvrees feat. Nora en Pure',
-	location: 'Heinekenkaade',
-	accent: '#333399',
-	startsAt: '2023-10-19T21:00:00+01:00',
-	endsAt: '2023-10-20T05:00:00+01:00',
-}, {
-	name: 'Anjunadeep ADE',
-	location: 'Shelter',
-	accent: '#d45d80',
-	startsAt: '2023-10-20T14:00:00+01:00',
-	endsAt: '2023-10-20T20:00:00+01:00',
-}, {
-	name: 'ADE Hangover',
-	location: 'NDSM',
-	accent: '#2a2f43',
-	startsAt: '2023-10-20T17:00:00+01:00',
-	endsAt: '2023-10-20T22:00:00+01:00',
-}, {
-	name: 'Placeholder 1',
-	location: 'Unknown',
-	accent: '#33CC99',
-	startsAt: '2023-10-21T23:00:00+01:00',
-	endsAt: '2023-10-22T06:00:00+01:00',
-}];
+import { format } from 'date-fns';
+import styled, { css } from 'styled-components';
+import { generatePartyIndex, generateTimelineIndicatorState } from '../utils/timeline-indicator-state';
+import { useAppSelector } from '../../../store/redux';
+import { Party } from '../../../store/parties/types';
+import { EditorDialog } from '../../party-editor/components/EditorDialog';
+import { generateWaypoints } from '../utils/waypoints';
+import { GetStarted } from './get-started/GetStarted';
+import { toHexAlpha } from '../../../design-system/utils';
+import { generateRandomPartyMessage } from '../../../utils/generation';
+import { useDispatch } from 'react-redux';
+import { editingActions } from '../../../store/editing';
 
 export const PartyTimeline: React.FC = () => {
-	const sortedPartiesByStart = [...parties].sort(sortIso8601((p => p.startsAt), 'asc'));
-	const sortedPartiesByEnd = [...parties].sort(sortIso8601((p => p.endsAt), 'desc'));
-	const firstPartyStartDate = new Date(sortedPartiesByStart[0].startsAt);
-	const lastPartyEndDate = new Date(sortedPartiesByEnd[0].endsAt);
-	const partyDurationMinutes = differenceInMinutes(lastPartyEndDate, firstPartyStartDate);
+	const dispatch = useDispatch();
+	const mode = useAppSelector(s => s.global.mode);
+	const partyState = useAppSelector(s => s.global.parties);
+	const editingId = useAppSelector(s => s.global.editing.editingId);
 
-	const hfSegments = Math.ceil(partyDurationMinutes / 30);
-	const timelineIndicatorState = generateTimelineIndicatorState(firstPartyStartDate, lastPartyEndDate);
+	const partyWaypoints = generateWaypoints(partyState);
+
+	if (partyWaypoints === null)
+		return <GetStarted />;
+
+	const {
+		partyCount,
+		firstPartyStartDate,
+		sortedPartiesByStart,
+		hourHourSegmentCount
+		
+	} = partyWaypoints;
+	const timelineIndicatorState = generateTimelineIndicatorState(
+		partyWaypoints.firstPartyStartDate,
+		partyWaypoints.lastPartyEndDate,
+	);
 
 	return (
-		<Container $halfHourSegments={hfSegments} $partiesCount={parties.length}>
+		<Container $halfHourSegments={hourHourSegmentCount} $partiesCount={partyCount}>
+			{Boolean(editingId) && (
+				<EditorDialog
+					id={editingId}
+					onClose={() => dispatch(editingActions.clearEditing())}
+				/>
+			)}
+
 			{timelineIndicatorState.map((_, i) => (
 				<TimelineBarSection
 					$hourDivider={i % 4 === 0}
-					$rowCount={parties.length}
+					$rowCount={partyCount}
 					$segmentIndex={i}
+					key={i}
 				/>
 			))}
 
 			{timelineIndicatorState.map((s, i) => (
-				<TimelineIndicatorSection $segmentIndex={i}>
+				<TimelineIndicatorSection $segmentIndex={i} key={`${s.date}${s.day}${s.time}`}>
 					<TimelineIndicatorTime>
 						{s.time}
 					</TimelineIndicatorTime>
@@ -80,31 +69,39 @@ export const PartyTimeline: React.FC = () => {
 			))}
 
 			{sortedPartiesByStart.map((p, i) => {
-				const startDate = new Date(p.startsAt);
-				const endDate = new Date(p.endsAt);
-				const { length, startIndex } = generatePartyIndex(firstPartyStartDate, startDate, endDate);
+				const { length, startIndex } = generatePartyIndex(firstPartyStartDate, p.startsAt, p.endsAt);
 
 				return (
-					<React.Fragment>
+					<React.Fragment key={p.id}>
 						<PartyTimelineIntro $partyIndex={i}>
 							<PartyTimelineIntroName>{p.name}</PartyTimelineIntroName>
 							<PartyTimelineIntroLocation>{p.location}</PartyTimelineIntroLocation>
 						</PartyTimelineIntro>
 						<PartyTimelineActiveBar
+							$disabled={mode !== 'editing'}
 							$party={p}
 							$partyIndex={i}
 							$length={length}
 							$timeIndex={startIndex}
+							onClick={() => {
+								if (mode === 'editing')
+									dispatch(editingActions.startEditing(p.id));
+							}}
 						>
-							<PartyTimelineTimes>{format(startDate, 'HH:mm')}{' - '}{format(endDate, 'HH:mm')}</PartyTimelineTimes>
-							<PartyTimelineQuote>it's a marathon, not a sprint</PartyTimelineQuote>
+							<PartyTimelineTimes>{format(p.startsAt, 'HH:mm')}{' - '}{format(p.endsAt, 'HH:mm')}</PartyTimelineTimes>
+							<PartyTimelineQuote>{generateRandomPartyMessage()}</PartyTimelineQuote>
 						</PartyTimelineActiveBar>
 					</React.Fragment>
 				);
 			})}
 
 			{timelineIndicatorState.map((s, i) => (
-				<TimelineIndicatorSection $footer $partyCount={parties.length} $segmentIndex={i}>
+				<TimelineIndicatorSection
+					$footer
+					$partyCount={partyCount}
+					$segmentIndex={i}
+					key={`${s.date}${s.day}${s.time}`}
+				>
 					<TimelineIndicatorTime>
 						{s.time}
 					</TimelineIndicatorTime>
@@ -153,11 +150,13 @@ const TimelineIndicatorDate = styled.div`
 	white-space: nowrap;
 	font-size: 1.1rem;
 	opacity: 0.8;
+	user-select: none;
 `;
 const TimelineIndicatorTime = styled.div`
 	white-space: nowrap;
 	font-size: 0.8rem;
 	opacity: 0.8;
+	user-select: none;
 `;
 
 const PartyTimelineIntro = styled.div<{ $partyIndex: number }>`
@@ -189,7 +188,13 @@ const PartyTimelineIntroLocation = styled.abbr`
 
 	text-decoration: none;
 `;
-const PartyTimelineActiveBar = styled.div<{ $partyIndex: number; $party: Party; $timeIndex: number; $length: number; }>`
+const PartyTimelineActiveBar = styled.div<{
+	$disabled: boolean;
+	$partyIndex: number;
+	$party: Party;
+	$timeIndex: number;
+	$length: number;
+}>`
 	grid-column: ${p => p.$timeIndex + 2} / ${p => (p.$timeIndex + 2) + (p.$length)};
 	grid-row: ${p => p.$partyIndex + 2};
 
@@ -201,14 +206,25 @@ const PartyTimelineActiveBar = styled.div<{ $partyIndex: number; $party: Party; 
 	align-items: center;
 	justify-content: center;
 
-	border-radius: 8px;
-	background: ${p => p.$party.accent}77;
-	backdrop-filter: blur(100px);
+	border-radius: 4px;
+	background: ${p => toHexAlpha(p.$party.accent, 0.6)};
+	backdrop-filter: blur(10px);
+
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.1);
 
 	user-select: none;
-	cursor: grab;
 
 	font-size: 0.9rem;
+
+	transition: all .2s ease;
+
+	${p => !p.$disabled && css`
+		&:hover {
+			cursor: pointer;
+			background: ${p.$party.accent}66;
+		}
+	`}
 `;
 const PartyTimelineTimes = styled.div`
 	font-size: 1.1rem;

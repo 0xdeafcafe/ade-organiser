@@ -6,7 +6,6 @@ const fs = require('fs');
 const reactPlugin = require('@vitejs/plugin-react');
 
 const environment = process.env.NODE_ENV;
-const sourcePath = environment === 'development' ? 'src' : 'dist';
 
 /**
  * @type {import('vite').UserConfig}
@@ -28,7 +27,7 @@ module.exports = {
 	],
 	build: {
 		target: 'chrome93',
-		outDir: '../dist',
+		outDir: '../docs',
 		emptyOutDir: true,
 		sourcemap: true,
 		assetsDir: '.',
