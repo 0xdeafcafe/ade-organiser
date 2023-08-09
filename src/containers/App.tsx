@@ -51,9 +51,10 @@ const pulse = keyframes`
 const Container = styled.div`
 	position: relative;
 	margin: 0;
-	padding: 100px 0 30px 30px;
+	padding: 100px 30px 30px 30px;
 `;
 const Title = styled.div`
+	display: inline-block;
 	font-size: 3.75rem;
 	font-weight: 300;
 	cursor: pointer;

@@ -2,7 +2,8 @@ import React from 'react';
 import { styled } from 'styled-components';
 import { Button } from '../../../../components/molecules/Button';
 import { useDispatch } from 'react-redux';
-import { partiesActions as actions } from '../../../../store/parties';
+import { partiesActions } from '../../../../store/parties';
+import { modeActions } from '../../../../store/mode';
 
 export const GetStarted: React.FC = () => {
 	const dispatch = useDispatch();
@@ -14,7 +15,10 @@ export const GetStarted: React.FC = () => {
 
 				<Text>{'Click below to get started with organising your party weekend'}</Text>
 
-				<Button onClick={() => dispatch(actions.createStartingParty())}>{'Get started!'}</Button>
+				<Button onClick={() => {
+					dispatch(partiesActions.createStartingParty());
+					dispatch(modeActions.setMode('editing'));
+				}}>{'Get started!'}</Button>
 			</Card>
 		</Container>
 	);
