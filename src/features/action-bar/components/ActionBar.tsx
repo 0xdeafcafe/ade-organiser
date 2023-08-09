@@ -4,6 +4,7 @@ import { useAppSelector } from '../../../store/redux';
 import { useDispatch } from 'react-redux';
 import { partiesActions } from '../../../store/parties';
 import { modeActions } from '../../../store/mode';
+import { getPathNameBase } from '../../../utils/url';
 
 interface BackgroundIndicatorState {
 	width: number;
@@ -66,7 +67,7 @@ export const ActionBar: React.FC = () => {
 			)}
 
 			<Item
-				onClick={() => window.location.href = '/'}
+				onClick={() => window.location.href = getPathNameBase()}
 				onMouseEnter={handleOnMouseEnter}
 			>
 				{'Reset'}

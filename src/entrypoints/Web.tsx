@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { parseUrlToPartyState } from '../utils/party-url-management';
 import { modeActions } from '../store/mode';
 import { partiesActions } from '../store/parties';
+import { getPathNameBase } from '../utils/url';
 
 export const WebEntrypoint: React.FC = () => {
 	const dispatch = useDispatch();
@@ -21,8 +22,8 @@ export const WebEntrypoint: React.FC = () => {
 
 	// Faux router...
 	useEffect(() => {
-		if (pathname !== '/') {
-			window.location.replace(`/${fragment}`);
+		if (pathname !== getPathNameBase()) {
+			window.location.replace(`${getPathNameBase()}${fragment}`);
 
 			return;
 		}

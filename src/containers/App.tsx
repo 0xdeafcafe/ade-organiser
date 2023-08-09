@@ -3,6 +3,7 @@ import styled, { keyframes } from 'styled-components';
 import { ActionBar } from '../features/action-bar/components/ActionBar';
 import { PartyTimeline } from '../features/party-timeline/components/PartyTimeline';
 import { ActionBarAdd } from '../features/action-bar/components/ActionBarAdd';
+import { getPathNameBase } from '../utils/url';
 
 export const App: React.FC = () => {
 	return (
@@ -10,7 +11,7 @@ export const App: React.FC = () => {
 			<Background />
 			<Background2 />
 			<Container>
-				<Title onClick={() => window.location.href = '/'}>
+				<Title onClick={() => window.location.href = getPathNameBase()}>
 					<strong>{'Houghton'}</strong>
 					{' organiser'}
 				</Title>
