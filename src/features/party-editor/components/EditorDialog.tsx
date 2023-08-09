@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Dialog from '../../../components/molecules/Dialog';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 import { useAppSelector } from '../../../store/redux';
 import { useDispatch } from 'react-redux';
 import { partiesActions as actions } from '../../../store/parties';
@@ -21,9 +21,26 @@ export const EditorDialog: React.FC<EditorDialogProps> = ({ id, onClose }) => {
 	const [partyStartsAt, setPartyStartsAt] = useState(() => party?.startsAt.toISOString());
 	const [partyEndsAt, setPartyEndsAt] = useState(() => party?.endsAt.toISOString());
 
+	const [partyStartValid, setPartyStartValid] = useState(() => true);
+	const [partyEndValid, setPartyEndValid] = useState(() => true);
+
 	useEffect(() => {
 		if (!id) return;
 	}, [id]);
+
+	useEffect(() => {
+		function handler(e: KeyboardEvent) {
+			if (e.key !== 'Escape') return;
+
+			e.stopPropagation();
+			e.preventDefault();
+			onClose();
+		}
+
+		window.addEventListener('keydown', handler);
+
+		return () => window.removeEventListener('keydown', handler);
+	})
 
 	if (!id) return null;
 
@@ -48,7 +65,7 @@ export const EditorDialog: React.FC<EditorDialogProps> = ({ id, onClose }) => {
 
 	return (
 		<Dialog open onClose={() => onClose()}>
-			<Title>{'Edit your party'}</Title>
+			<Title>{'Edit party'}</Title>
 			<SubTitle>{'Aliqua sit officia officia amet enim laboris occaecat incididunt nisi'}</SubTitle>
 
 			<form onSubmit={e => {
@@ -77,24 +94,35 @@ export const EditorDialog: React.FC<EditorDialogProps> = ({ id, onClose }) => {
 				<FormGroup>
 					<Label htmlFor={'partyStartsAt'}>{'Party starting 🎉'}</Label>
 					<Input
+						$invalid={!partyStartValid}
 						name={'partyStartsAt'}
 						type={'text'}
 						value={partyStartsAt}
-						onChange={e => setPartyStartsAt(e.currentTarget.value)}
+						onChange={e => {
+							setPartyStartValid(isIso8601(e.currentTarget.value));
+							setPartyStartsAt(e.currentTarget.value);
+						}}
 					/>
 				</FormGroup>
 				<FormGroup>
 					<Label htmlFor={'partyEndsAt'}>{'Party closing 🥺'}</Label>
 					<Input
+						$invalid={!partyEndValid}
 						name={'partyEndsAt'}
 						type={'text'}
 						value={partyEndsAt}
-						onChange={e => setPartyEndsAt(e.currentTarget.value)}
+						onChange={e => {
+							setPartyEndValid(isIso8601(e.currentTarget.value));
+							setPartyEndsAt(e.currentTarget.value);
+						}}
 					/>
 				</FormGroup>
 
 				<ButtonGroup>
-					<Button onClick={handleSubmit}>
+					<Button
+						disabled={!partyStartValid || !partyEndValid}
+						onClick={handleSubmit}
+					>
 						{'Save'}
 					</Button>
 					<Button $style={'secondary'} onClick={onClose}>
@@ -131,7 +159,7 @@ const Label = styled.label`
 	font-size: 0.8rem;
 	margin-bottom: 4px;
 `;
-const Input = styled.input`
+const Input = styled.input<{ $invalid?: boolean }>`
 	display: block;
 	width: calc(100% - 12px);
 
@@ -145,11 +173,15 @@ const Input = styled.input`
 	-webkit-backdrop-filter: blur(12.9px);
 	border: 1px solid rgba(255, 255, 255, 0.4);
 
-	&:focus {
-		
-	}
+	${p => p.$invalid && css`
+		border: 1px solid rgba(239, 34, 34, 0.4);
+	`}
 `;
 
 const ButtonGroup = styled(ButtonGroupOriginal)`
 	justify-content: flex-end;
 `;
+
+function isIso8601(value: string) {
+	return new Date(value).toJSON() === value;
+}
