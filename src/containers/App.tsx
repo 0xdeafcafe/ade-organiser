@@ -51,7 +51,7 @@ const pulse = keyframes`
 const Container = styled.div`
 	position: relative;
 	margin: 0;
-	padding: 100px 30px 30px 30px;
+	padding: 100px 30px 200px 30px;
 `;
 const Title = styled.div`
 	display: inline-block;

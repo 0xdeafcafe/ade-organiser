@@ -64,8 +64,6 @@ const Container = styled.div<{ backdrop?: boolean }>`
 
 	z-index: 102;
 
-	max-height: 100vh;
-	max-width: 100vw;
 	overflow-y: scroll;
 `;
 
@@ -79,7 +77,8 @@ const Wrapper = styled.div`
 
 	padding: 40px;
 	padding-bottom: 20px;
-	min-width: 500px;
+	max-height: 100vh;
+	max-width: 100vw;
 `;
 
 export default Dialog;
