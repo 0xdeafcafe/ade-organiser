@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { partiesActions as actions } from '../../../store/parties';
 import { Button } from '../../../components/molecules/Button';
 import { ButtonGroup as ButtonGroupOriginal } from '../../../components/molecules/ButtonGroup';
+import { isAfter, isBefore } from 'date-fns';
 
 interface EditorDialogProps {
 	id: string | null;
@@ -99,7 +100,12 @@ export const EditorDialog: React.FC<EditorDialogProps> = ({ id, onClose }) => {
 						type={'text'}
 						value={partyStartsAt}
 						onChange={e => {
-							setPartyStartValid(isIso8601(e.currentTarget.value));
+							let valid = isIso8601(e.currentTarget.value);
+
+							if (valid && partyEndValid)
+								valid = isBefore(new Date(e.currentTarget.value), new Date(partyEndsAt));
+
+							setPartyStartValid(valid);
 							setPartyStartsAt(e.currentTarget.value);
 						}}
 					/>
@@ -112,7 +118,12 @@ export const EditorDialog: React.FC<EditorDialogProps> = ({ id, onClose }) => {
 						type={'text'}
 						value={partyEndsAt}
 						onChange={e => {
-							setPartyEndValid(isIso8601(e.currentTarget.value));
+							let valid = isIso8601(e.currentTarget.value);
+
+							if (valid && partyStartValid)
+								valid = isAfter(new Date(e.currentTarget.value), new Date(partyStartsAt));
+
+							setPartyEndValid(valid);
 							setPartyEndsAt(e.currentTarget.value);
 						}}
 					/>
