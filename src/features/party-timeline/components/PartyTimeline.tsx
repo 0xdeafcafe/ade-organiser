@@ -195,7 +195,7 @@ const PartyTimelineActiveBar = styled.div<{
 	$timeIndex: number;
 	$length: number;
 }>`
-	grid-column: ${p => p.$timeIndex + 2} / ${p => (p.$timeIndex + 2) + (p.$length)};
+	grid-column: ${p => p.$timeIndex + 2} / ${p => (p.$timeIndex + 2 + p.$length)};
 	grid-row: ${p => p.$partyIndex + 2};
 
 	margin: 12px 6px;

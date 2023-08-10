@@ -42,11 +42,11 @@ export function generateTimelineIndicatorState(startDate: Date, endDate: Date): 
 }
 
 export function generatePartyIndex(startDate: Date, partyStartDate: Date, partyEndDate: Date): PartyIndex {
-	const steps = eachMinuteOfInterval({ start: partyStartDate, end: partyEndDate }, { step: 30 }).length;
+	const steps = eachMinuteOfInterval({ start: partyStartDate, end: partyEndDate }, { step: 30 }).length - 1;
 	const paddingSteps = (() => {
 		if (startDate.getTime() === partyStartDate.getTime()) return 0;
 		
-		return eachMinuteOfInterval({ start: startDate, end: partyStartDate }, { step: 30 }).length;
+		return eachMinuteOfInterval({ start: startDate, end: partyStartDate }, { step: 30 }).length - 1;
 	})();
 
 	return {
